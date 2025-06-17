@@ -1,0 +1,11 @@
+folium
+requests
+beautifulsoup4
+lxml
+colorama
+pyfiglet
+fake-useragent
+vk_api
+telethon
+phonenumbers
+pysocks
