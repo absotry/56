@@ -4,10 +4,6 @@ NOW CAN BE PROBLEMS AND ERRORS WITH PROXY, I WILL FIX IT
 
 
 
-FOR TERMUX:
-pkg install python
-pkg update -y && pkg upgrade -y && pkg install -y python libxml2 libxslt openssl libjpeg-turbo && pip install --upgrade pip wheel && pip install folium requests beautifulsoup4 lxml colorama pyfiglet fake-useragent vk-api telethon phonenumbers socks pysocks pytz
-
 NOT SUPPORTA FOR MAC
 
 FOR WINDOWS:
