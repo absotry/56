@@ -1,0 +1,39 @@
+name: Execute User Code
+
+on:
+  workflow_dispatch:
+    inputs:
+      token:
+        description: "User access token"
+        required: true
+        type: string
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Execute protected code
+        env:
+          USER_TOKEN: ${{ inputs.token }}
+        run: |
+          # Ваш защищенный код
+          python -c "import os; print(f'Hello! Token: {os.environ['USER_TOKEN'][:6]}...')"
+          
+          # Пример обработки и сохранения результата
+          echo "Результат работы" > output.txt
+
+      - name: Upload result
+        uses: actions/upload-artifact@v3
+        with:
+          name: execution-result
+          path: output.txt
