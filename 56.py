@@ -40,7 +40,6 @@ import configparser
 from urllib.parse import urlparse
 import socket
 import socks
-import PyInstaller.__main__
 
 
 
