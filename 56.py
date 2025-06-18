@@ -6,7 +6,6 @@ import lxml
 import colorama
 import pyfiglet
 from colorama import init
-init()
 from colorama import Fore, Back, Style
 import threading
 
@@ -44,7 +43,7 @@ import socks
 
 
 
-
+init()
 # CLEAR CONSOLE
 def clear_console():
   os.system('cls')
@@ -365,6 +364,7 @@ def bomber_worker(account: dict, target: str, subject: str, message: str, amount
 # VK
 def VK_search(username, vkTOKEN, VKvers, proxy_dict=None):
     print_service_header("VK")
+    proxy_dict = get_random_proxy()
     fields = '''
         photo_200, status, city, country, bdate, contacts, 
         education, followers_count, occupation, personal, 
@@ -445,6 +445,7 @@ def VK_search(username, vkTOKEN, VKvers, proxy_dict=None):
         print(f"{Fore.RED}VK Search Error: {e}")
 
 def get_posts(user_id, token, version, proxy_dict=None):
+    proxy_dict = get_random_proxy()
     try:
         params = {
             'owner_id': user_id,
@@ -476,6 +477,7 @@ def get_posts(user_id, token, version, proxy_dict=None):
 # 220VK
     
 def search_220vk(username, proxy_dict=None):
+    proxy_dict = get_random_proxy()
     url = f"https://220vk.com/{username}"
     try:
         response = requests.get(url, headers=headers, proxies=proxy_dict, timeout=15)
@@ -672,6 +674,7 @@ def search_220vk(username, proxy_dict=None):
 
 # Tiktok
 def search_tiktok(username, proxy_dict=None):
+    proxy_dict = get_random_proxy()
     print_service_header("TIKTOK")
     try:
         url = f"https://www.tiktok.com/@{username}"
@@ -689,6 +692,7 @@ def search_tiktok(username, proxy_dict=None):
 
 # Steam
 def search_steam(username, proxy_dict=None):
+    proxy_dict = get_random_proxy()
     print_service_header("STEAM")
     url = f"https://steamcommunity.com/id/{username}"
     try:
@@ -750,6 +754,7 @@ def search_steam(username, proxy_dict=None):
 
 # TELEGRAM
 def search_telegram(username, proxy_dict=None):
+    proxy_dict = get_random_proxy()
     print_service_header("TELEGRAM")
     url = f"https://t.me/{username}"
     try:
@@ -796,6 +801,7 @@ def search_telegram(username, proxy_dict=None):
 
 # YOUTUBE (using API)
 def search_youtube(username, api_key, proxy_dict=None):
+    proxy_dict = get_random_proxy()
     print_service_header("YOUTUBE")
     if not api_key:
         print(f"{Fore.YELLOW}YouTube API key not set. Skipping YouTube search.")
@@ -885,6 +891,7 @@ def search_youtube(username, api_key, proxy_dict=None):
 
 # TWITCH
 def search_twitch(username, proxy_dict=None):
+    proxy_dict = get_random_proxy()
     print_service_header("TWITCH")
     url = f"https://twitchtracker.com/{username}"
     turl = f"https://www.twitch.tv/{username}"
@@ -931,6 +938,7 @@ def search_twitch(username, proxy_dict=None):
 
 # GITHUB
 def search_github(username, proxy_dict=None):
+    proxy_dict = get_random_proxy()
     print_service_header("GITHUB")
     url = f"https://github.com/{username}"
     try:
@@ -984,6 +992,7 @@ def search_github(username, proxy_dict=None):
 
 def search_x(username, proxy_dict=None):
     print_service_header("X.COM")
+    proxy_dict = get_random_proxy()
     url = f"https://x.com/{username}"
     try:
         # Увеличиваем таймаут и добавляем User-Agent
@@ -1033,6 +1042,8 @@ def search_x(username, proxy_dict=None):
 # FACEIT
 
 def search_faceit(username, faceit_api_key, proxy_dict=None):
+    proxy_dict = get_random_proxy()
+    
     print_service_header("FACEIT")
     if not faceit_api_key:
         print(f"{Fore.YELLOW}Faceit API key not set. Skipping Faceit search.")
@@ -1115,6 +1126,7 @@ def search_faceit(username, faceit_api_key, proxy_dict=None):
 #REDDIT
 
 def search_reddit(username, proxy_dict=None):
+    proxy_dict = get_random_proxy()
     try:
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -1182,6 +1194,7 @@ def search_reddit(username, proxy_dict=None):
 # I PEEK YOU
 
 def ipeekyou(username, proxy_dict):
+    proxy_dict = get_random_proxy()
 
 
     print_service_header("I peek you")
@@ -1224,6 +1237,7 @@ def ipeekyou(username, proxy_dict):
 # Numverify
 
 def search_numverify(number, NumVerifyAPI, proxy_dict=None):
+    proxy_dict = get_random_proxy()
     
     url = f"http://apilayer.net/api/validate?access_key={NumVerifyAPI}&number={number}"
 
@@ -1249,7 +1263,8 @@ def search_numverify(number, NumVerifyAPI, proxy_dict=None):
 # phone-analysic
 
 def phonenumbers_search(number):
-    numbers56 = phonenumbers.parse(number)
+    number56 = '+' + number
+    numbers56 = phonenumbers.parse(number56)
     timez = timezone.time_zones_for_number(numbers56)
     carrier56 = carrier.name_for_number(numbers56, 'ru')
     region56 = geocoder.description_for_number(numbers56, 'ru')
@@ -1265,6 +1280,41 @@ def phonenumbers_search(number):
 
 
 
+def truecaller_search(number, TrueCallerAPI, proxy_dict=None):
+    proxy_dict = get_random_proxy()
+    number_with_plus = '+' + number 
+    parsed_number = phonenumbers.parse(number_with_plus, None)
+    region_code = phonenumbers.region_code_for_number(parsed_number)
+    national_num = phonenumbers.national_significant_number(parsed_number)
+    url = f"https://api.truecaller.com/v2.5/search?phone={national_num}&countryCode={region_code}"
+    headers = {
+    "Authorization": f"Bearer {TrueCallerAPI}",
+    "Accept": "application/json",
+    'user-agent': user
+    }
+    try:
+        print_service_header("TrueCaller")
+        response = requests.get(url, headers=headers, proxies=proxy_dict)
+        response.raise_for_status()
+        data = response.json()
+
+        if 'data' in data and len(data['data']) > 0:
+            result = data['data'][0]
+            print("Name:", result.get('name', 'N/A'))
+            print("Phone:", result.get('phones', [{}])[0].get('nationalFormat', 'N/A'))
+            print("Country:", result.get('addresses', [{}])[0].get('country', 'N/A'))
+            print("Email:", result.get('internetAddresses', [{}])[0].get('id', 'N/A'))
+            print("Company:", result.get('jobs', [{}])[0].get('company', 'N/A'))
+        else:
+            print("Not found")
+    
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+
+
+
+
+
 ################################################################################################
 
 # IP
@@ -1276,6 +1326,7 @@ def phonenumbers_search(number):
 
 
 def ip_search(ipby56, proxy_dict=None):
+    proxy_dict = get_random_proxy()
     try:
         url = f"http://ip-api.com/json/{ipby56}"
 
@@ -1307,6 +1358,7 @@ def ip_search(ipby56, proxy_dict=None):
 # I KNOW WHAT YOU DOWNOLOAD
 
 def iknowwd(ipby56, proxy_dict):
+    proxy_dict = get_random_proxy()
     url = f"https://iknowwhatyoudownload.com/en/peer/?ip={ipby56}"
     print(Fore.MAGENTA + "")
     print_service_header("IKWYD")
@@ -1316,6 +1368,7 @@ def iknowwd(ipby56, proxy_dict):
 #SPYS
 
 def spys(ipby56, proxy_dict):
+    proxy_dict = get_random_proxy()
     
     cookies = {
         '_ga_XWX5S73YKH': 'GS2.1.s1750083539$o3$g1$t1750084547$j20$l0$h0',
@@ -1359,6 +1412,7 @@ def spys(ipby56, proxy_dict):
 # CHECK HOST
 
 def check_host(ipby56, proxy_dict):
+    proxy_dict = get_random_proxy()
 
     cookies = {
         'cf_clearance': '6HfXMljw8x0YSaTX4M.Qmzg9BejGkcB.nIDqiXB145Q-1750062009-1.2.1.1-3lBzXT2STcn0mPHYrMaK7ndU_8XXzyO.MHRQJ0QVQOguxxDP42lCjWnXUYNMpuZH9T4U58Zhw4Zb2k3rUrrfsT.ShqJ3CFHmw9Z23.3QWVEWjA.3lbQFNODplm_AvYorv7FNawR.TMDqhgwlV2WdZ37w0e0tWnzU.OAe0rC.k8kBlQVn3pauAvlfyItkg8icNPNvD4gsUnl4uJfQGhYcK85fc6bl4WjY_jP8QfQlpNWqKlViphPgtY.Zue1v5meNjx_ro0AuBhDCUxGwE_APKKeqfw5w_lrBxLyRJmLFAU6eJx7gaIpM1MBEFSMHSOdVG3cBGEGQdgzj1ELX4VJfLXCMnaj3qr1Ranp_UPSB4CipnGZHRvPdSmANAZdlFRj.',
@@ -1639,6 +1693,7 @@ def main():
     
     if input(Fore.WHITE + "TYPE 56 TO CONTINUE\n\n\n\n>:     ") != "56":
         return
+    clear_console()
     
     # Настройки по умолчанию
     proxies56 = None
@@ -1661,6 +1716,7 @@ def main():
     TGgroup = None
     PROXIES_LOADED = False
     BOMBER_CONFIG = None
+    TrueCallerAPI = None
     
     # Параметры атаки Telegram
     MAX_ATTEMPTS = 5
@@ -1672,6 +1728,7 @@ def main():
 
     while True:
         time.sleep(0.5)
+        print(Fore.MAGENTA + absotry)
 
         choice = input(Fore.WHITE + 
             "\nOptions:\n\n"
@@ -1686,12 +1743,17 @@ def main():
 
         if choice == "1":
             clear_console()
+            print(Fore.MAGENTA + absotry)
             osint56 = input(Fore.WHITE + "\nChoose:\n1. Username\n2. Phone\n3. Email\n4. ip\n>:     ")
             if osint56 == "1":
+                clear_console()
+                print(Fore.MAGENTA + absotry)
 
-                username = input(Fore.WHITE + "Enter username:\n>:     ").strip()
+                username = input(Fore.WHITE + "\nEnter username:\n>:     ").strip()
                 if not username:
-                    print(f"{Fore.RED}Username cannot be empty")
+                    clear_console()
+                    print(Fore.MAGENTA + absotry)
+                    print(f"{Fore.RED}\nUsername cannot be empty")
                     continue
                     
                 proxy_dict = None
@@ -1722,7 +1784,8 @@ def main():
             
             if osint56 == "2":
                 clear_console()
-                number = input(Fore.WHITE + "Enter number\n>:     ")
+                print(Fore.MAGENTA + absotry)
+                number = input(Fore.WHITE + "\nEnter number\n>:     ")
                 proxy_dict = None
                 if get_random_proxy():
                     print(f"{Fore.YELLOW}\n{'='*50}")
@@ -1732,15 +1795,19 @@ def main():
 
             
                 else:
-                    print("Proxy error")
+                    clear_console()
+                    print(Fore.MAGENTA + absotry)
+                    print("\nProxy error")
 
 
                 search_numverify(number, NumVerifyAPI, proxy_dict)
                 phonenumbers_search(number)
+                truecaller_search(number, TrueCallerAPI, proxy_dict)
 
             if osint56 =="3":
                 clear_console()
-                email = input(Fore.WHITE + "Coming soon\n>:     ")
+                print(Fore.MAGENTA + absotry)
+                email = input(Fore.WHITE + "\nComing soon\n>:     ")
                 if get_random_proxy():
                     print(f"{Fore.YELLOW}\n{'='*50}")
                     print(f"{Fore.CYAN}PROXY CHECK")
@@ -1749,12 +1816,15 @@ def main():
 
             
                 else:
-                    print("Proxy error")
+                    clear_console()
+                    print(Fore.MAGENTA + absotry)
+                    print("\nProxy error")
 
 
 
             if osint56 =="4":
                 clear_console()
+                print(Fore.MAGENTA + absotry)
                 ipby56 = input("ip:\n>:     ")
                 proxy_dict = None
                 if get_random_proxy():
@@ -1765,6 +1835,8 @@ def main():
 
             
                 else:
+                    clear_console()
+                    print(Fore.MAGENTA + absotry)
                     print("Proxy error")
                 ip_search(ipby56, proxy_dict)
                 iknowwd(ipby56, proxy_dict)
@@ -1774,49 +1846,79 @@ def main():
 
         elif choice == "2":
             clear_console()
-            APIchoose = input(Fore.WHITE + "Choose:\n1.VK\n2.Telegram\n3.YouTube\n4. FACEIT\n5. GetContact\n6.Numverify\n7.BreachDirectory\n>:     ")
+            print(Fore.MAGENTA + absotry)
+            APIchoose = input(Fore.WHITE + "Choose:\n1.VK\n2.Telegram\n3.YouTube\n4. FACEIT\n5. GetContact\n6.Numverify\n7.TrueCaller\n>:     ")
             if APIchoose == "1":
-                vkTOKEN = input("Enter VK API token:\n>: ").strip()
+                clear_console()
+                print(Fore.MAGENTA + absotry)
+                vkTOKEN = input(Fore.WHITE  + "Enter VK API token:\n>: ").strip()
                 print(f"{Fore.GREEN}VK token set successfully!")
             elif APIchoose == "2":
-                print(Fore.RED + 'Note: API keys are not required for Telegram parsing')
-                tgapivibor = input("Choose:\n1.TG API APP\n2.TG API HASH\n3.Number\n4.Skip\n>:     ")
+                clear_console
+                print(Fore.MAGENTA + absotry)
+                tgapivibor = input(Fore.WHITE  + "Choose:\n1.TG API APP\n2.TG API HASH\n3.Number\n4.Skip\n>:     ")
                 if tgapivibor == "1":
-                    tg_apiapp = input("Enter Telegram API APP:\n>:     ")
+                    clear_console()
+                    print(Fore.MAGENTA + absotry)
+                    tg_apiapp = input(Fore.WHITE  + "Enter Telegram API APP:\n>:     ")
                 elif tgapivibor == "2":
-                    tg_apihash = input("Enter Telegram API HASH:\n>:     ")
+                    clear_console()
+                    print(Fore.MAGENTA + absotry)
+                    tg_apihash = input(Fore.WHITE  + "Enter Telegram API HASH:\n>:     ")
                 elif tgapivibor == "3":
-                    TGnumber = input("Enter Telegram number:\n>:     ")
+                    clear_console()
+                    print(Fore.MAGENTA + absotry)
+                    TGnumber = input(Fore.WHITE  + "Enter Telegram number:\n>:     ")
                 else:
+                    clear_console()
+                    print(Fore.MAGENTA + absotry)
                     print(f"{Fore.YELLOW}Skipping Telegram API setup")
             elif APIchoose == "3":
-                youtube_api_key = input("Enter YouTube API key:\n>:     ").strip()
+                clear_console
+                print(Fore.MAGENTA + absotry)
+                youtube_api_key = input(Fore.WHITE  + "Enter YouTube API key:\n>:     ").strip()
                 print(f"{Fore.GREEN}YouTube API key set successfully!")
             elif APIchoose == "4":
-                faceitapi = input(f" Faceit api\n>     :")
+                clear_console()
+                print(Fore.MAGENTA + absotry)
+                faceitapi = input(Fore.WHITE + " Faceit api\n>:     ")
                 print(f"{Fore.GREEN}Faceit API key set successfully!")
             elif APIchoose == "5":
-                getcontactapi = input(Fore.MAGENTA + "getcontact api\n>     :")
+                clear_console()
+                print(Fore.MAGENTA + absotry)
+                getcontactapi = input(Fore.WHITE + "getcontact api\n>:     ")
                 print(Fore.GREEN + "Getcontact API key set successfully!")
             elif APIchoose == "6":
-                NumVerifyAPI = input(Fore.MAGENTA + "numverify api\n>     :")
+                clear_console()
+                print(Fore.MAGENTA + absotry)
+                NumVerifyAPI = input(Fore.WHITE + "numverify api\n>:     ")
                 print(Fore.GREEN + "numverify API key set successfully!")
+            elif APIchoose == '7':
+                clear_console()
+                print(Fore.MAGENTA + absotry)
+                TrueCallerAPI = input(Fore.WHITE  + '\nTrueCaller API:\n>:     ')
             else:
+                clear_console()
+                print(Fore.MAGENTA + absotry)
                 print(f"{Fore.RED}Invalid choice")
                 
 
         elif choice == "3":  # Прокси
             clear_console()
+            print(Fore.MAGENTA + absotry)
             proxy_file = input("Path to proxy config file:\n>:     ")
             PROXIES_LOADED = load_proxies(proxy_file)
         
 
         elif choice == "4":
             clear_console()
-            bomber_type = input("Choose:\n1. Gmail\n2. Number\n>:     ")
+            print(Fore.MAGENTA + absotry)
+            bomber_type = input(Fore.WHITE + "\nChoose:\n1. Gmail\n2. Number\n>:     ")
             
             if bomber_type == "1":  # Gmail из INI-конфига
-                config_file = input("Config INI file path:\n>:     ")
+                clear_console()
+                print(Fore.MAGENTA + absotry)
+                config_file = input("\nConfig INI file path:\n>:     ")
                 BOMBER_CONFIG = load_bomber_config(config_file)  # Используем новую функцию
                 
                 if BOMBER_CONFIG:
@@ -1825,12 +1927,17 @@ def main():
 
             if bomber_type == "2":
                 clear_console()
-                chooser = input("Choose:\n1.Target number phone\n2. Start sms bomber\n>:     ")
+                print(Fore.MAGENTA + absotry)
+                chooser = input("\nChoose:\n1.Target number phone\n2. Start sms bomber\n>:     ")
                 if chooser == "1":
-                    phoneby56 = input("Target number of phone:\n>:"     )
+                    clear_console()
+                    print(Fore.MAGENTA + absotry)
+                    phoneby56 = input("\nTarget number of phone:\n>:"     )
                 else:
                     print("")
                 if chooser == "2":
+                    clear_console()
+                    print(Fore.MAGENTA + absotry)
                     smsbomber(phoneby56)
                 else:
                     None
@@ -1840,7 +1947,8 @@ def main():
 
         elif choice == "5":
             clear_console()
-            telegramvibor = input(Fore.MAGENTA + 
+            print(Fore.MAGENTA + absotry)
+            telegramvibor = input(Fore.WHITE + 
                 "Telegram Attack Menu:\n"
                 "1. Load Telegram Accounts\n"
                 "2. Set Target Phone Number\n"
@@ -1858,16 +1966,19 @@ def main():
             
             if telegramvibor == "1":
                 clear_console()
+                print(Fore.MAGENTA + absotry)
                 file_path = input("Path to accounts config (default: tg_accounts.ini):\n>: ") or "tg_accounts.ini"
                 if not load_telegram_accounts(file_path):
                     if input("Create sample config? (y/n): ").lower() == "y":
                         save_accounts_config(file_path)
             elif telegramvibor == "2":
                 clear_console()
+                print(Fore.MAGENTA + absotry)
                 TGnumber = input("Target Phone Number (+XXXXXXXXXXX):\n>: ")
                 print(f"{Fore.GREEN}Target number set!{Style.RESET_ALL}")
             elif telegramvibor == "3":
                 clear_console()
+                print(Fore.MAGENTA + absotry)
                 try:
                     MAX_ATTEMPTS = int(input("Enter MAX ATTEMPTS (per thread):\n>: "))
                     print(f"{Fore.GREEN}MAX ATTEMPTS set to {MAX_ATTEMPTS}{Style.RESET_ALL}")
@@ -1875,6 +1986,7 @@ def main():
                     print(f"{Fore.RED}Invalid input! Must be a number.{Style.RESET_ALL}")
             elif telegramvibor == "4":
                 clear_console()
+                print(Fore.MAGENTA + absotry)
                 try:
                     min_delay = float(input("Enter MIN DELAY (seconds):\n>: "))
                     max_delay = float(input("Enter MAX DELAY (seconds):\n>: "))
@@ -1886,6 +1998,7 @@ def main():
                     print(f"{Fore.RED}Invalid input!{Style.RESET_ALL}")
             elif telegramvibor == "5":
                 clear_console()
+                print(Fore.MAGENTA + absotry)
                 try:
                     THREADS_COUNT = int(input("Enter THREADS COUNT:\n>: "))
                     if THREADS_COUNT < 1 or THREADS_COUNT > 200:
@@ -1895,14 +2008,17 @@ def main():
                     print(f"{Fore.RED}Invalid input! Must be between 1-200.{Style.RESET_ALL}")
             elif telegramvibor == "6":
                 clear_console()
+                print(Fore.MAGENTA + absotry)
                 if not TELEGRAM_ACCOUNTS:
                     print(f"{Fore.RED}Error: No Telegram accounts loaded!{Style.RESET_ALL}")
                     continue
                 if not TGnumber:
+                    clear_console()
+                    print(Fore.MAGENTA + absotry)
                     print(f"{Fore.RED}Error: Target phone number not set!{Style.RESET_ALL}")
                     continue
                     
-                # Запуск мощной атаки
+                # Session killer
                 attack_threads = start_telegram_attack(
                     TGnumber,
                     THREADS_COUNT,
@@ -1913,7 +2029,8 @@ def main():
                 # Ожидание завершения всех потоков
                 for t in attack_threads:
                     t.join()
-                
+                clear_console()
+                print(Fore.MAGENTA + absotry)
                 print(f"{Fore.GREEN}\nAttack completed! All sessions terminated!{Style.RESET_ALL}")
             elif telegramvibor == "7":
                 continue
@@ -1922,11 +2039,13 @@ def main():
                 
         elif choice == "6":
             clear_console()
-            clear_console()
+            print(Fore.MAGENTA + absotry)
             print(f"{Fore.YELLOW}Exiting...{Style.RESET_ALL}")
             break
 
         else:
+            clear_console()
+            print(Fore.MAGENTA + absotry)
             print(f"{Fore.RED}Invalid choice{Style.RESET_ALL}")
 
 if __name__ == '__main__':
