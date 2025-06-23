@@ -3,9 +3,6 @@
 NOW CAN BE PROBLEMS AND ERRORS WITH PROXY, I WILL FIX IT
 
 
-
-NOT SUPPORTA FOR MAC
-
 FOR WINDOWS:
 
 pip install folium requests beautifulsoup4 lxml colorama pyfiglet fake-useragent vk-api telethon phonenumbers pysocks pytz pyinstaller
